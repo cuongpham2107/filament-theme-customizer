@@ -1,7 +1,7 @@
 # 🎨 Filament Theme Customizer (Theme Studio)
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/cuongpham/filament-theme-customizer.svg?style=flat-square)](https://packagist.org/packages/cuongpham/filament-theme-customizer)
-[![Total Downloads](https://img.shields.io/packagist/dt/cuongpham/filament-theme-customizer.svg?style=flat-square)](https://packagist.org/packages/cuongpham/filament-theme-customizer)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/cuongpham2107/filament-theme-customizer.svg?style=flat-square)](https://packagist.org/packages/cuongpham2107/filament-theme-customizer)
+[![Total Downloads](https://img.shields.io/packagist/dt/cuongpham2107/filament-theme-customizer.svg?style=flat-square)](https://packagist.org/packages/cuongpham2107/filament-theme-customizer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE.md)
 [![Filament Version](https://img.shields.io/badge/Filament-v5.x-orange?style=flat-square&logo=laravel)](https://filamentphp.com)
 
@@ -34,7 +34,7 @@ A powerful, elegant, **zero-reload** visual Theme Studio plugin for **Filament v
 Install the package via Composer:
 
 ```bash
-composer require cuongpham/filament-theme-customizer
+composer require cuongpham2107/filament-theme-customizer
 ```
 
 *(Or via GitHub VCS repository in your `composer.json` before publishing to Packagist)*
@@ -71,11 +71,11 @@ In your panel's theme stylesheet (e.g. `resources/css/filament/admin/theme.css`)
 
 ```css
 @import '../../../../vendor/filament/filament/resources/css/theme.css';
-@import '../../../../vendor/cuongpham/filament-theme-customizer/resources/css/theme-customizer.css';
+@import '../../../../vendor/cuongpham2107/filament-theme-customizer/resources/css/theme-customizer.css';
 
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
-@source '../../../../vendor/cuongpham/filament-theme-customizer/resources/views/**/*.blade.php';
+@source '../../../../vendor/cuongpham2107/filament-theme-customizer/resources/views/**/*.blade.php';
 ```
 
 Then rebuild your assets:
