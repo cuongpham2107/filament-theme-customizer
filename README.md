@@ -1,29 +1,51 @@
-# Filament Theme Customizer Plugin
+# 🎨 Filament Theme Customizer (Theme Studio)
 
-A powerful, instant, zero-reload visual theme studio plugin for Filament v5.
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/cuongpham/filament-theme-customizer.svg?style=flat-square)](https://packagist.org/packages/cuongpham/filament-theme-customizer)
+[![Total Downloads](https://img.shields.io/packagist/dt/cuongpham/filament-theme-customizer.svg?style=flat-square)](https://packagist.org/packages/cuongpham/filament-theme-customizer)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE.md)
+[![Filament Version](https://img.shields.io/badge/Filament-v5.x-orange?style=flat-square&logo=laravel)](https://filamentphp.com)
 
-## Features
+A powerful, elegant, **zero-reload** visual Theme Studio plugin for **Filament v5**. Empowers users and administrators to customize their panel experience in real time with instantaneous live preview, zero flash of unstyled theme (Anti-FOUC), and granular authorization controls.
 
-- 🎨 **Instant Preset Switching**: Modern, Precision, Velvet, and Obsidian themes.
-- 🌓 **Zero-Reload Dark/Light Mode**: Smooth instant transition.
-- 🌈 **8 Tailored Color Palettes**: Amber, Blue, Forest, Violet, Rose, Teal, Zinc, Citrus.
-- 🔲 **Live Corner Radius Adjustment**: None, Small, Medium, Large, Full.
-- 📐 **Live Spacing & Density Control**: Tight, Compact, Normal, Spacious.
-- 🔤 **Live Font Family**: Inter, Outfit, Plus Jakarta Sans, Figtree, Lora, JetBrains Mono.
-- 📏 **Compact Filament Slider Font Sizing**: Seamless hot-swap font scaling (XS, SM, MD, LG, XL).
-- 🧭 **Navigation Layouts**: Collapsible Sidebar, Fully Collapsible (Slide-over), Fixed, and Top Navigation.
-- 🔒 **Authorization & Permission Control**: Support for closures and role/permission checks (`canCustomize`).
-- ⚡ **Anti-FOUC Prevention**: Zero layout shift and zero flash of unstyled theme on page refresh.
+---
 
-## Installation
+## ✨ Features
+
+- ⚡ **Zero-Reload Instant Preview**: Hot-swaps themes, styles, colors, layouts, and typography in real time with zero page refresh.
+- 🎨 **Official Theme Presets**: **Modern**, **Precision**, **Velvet**, and **Obsidian** (matching official Filament theme styling).
+- 🌓 **Instant Dark / Light Mode**: Seamless transitions with full Tailwind dark mode compatibility.
+- 🌈 **8 Curated Color Palettes**: Amber, Blue, Forest, Violet, Rose, Teal, Zinc, and Citrus with auto-contrasted primary button text.
+- 🔲 **Live Corner Radius**: None (`0px`), Small (`4px`), Medium (`8px`), Large (`12px`), and Pill (`9999px`).
+- 📐 **Live Spacing & Density**: Tight, Compact, Normal, and Spacious.
+- 🔤 **Live Typography**: Inter, Outfit, Plus Jakarta Sans, Figtree, Lora, and JetBrains Mono.
+- 📏 **Filament-Style Font Size Slider**: Sleek compact slider with discrete stops (`XS`, `SM`, `MD`, `LG`, `XL`) and signature handle.
+- 🧭 **Navigation Layouts**:
+  - Collapsible Sidebar
+  - Fully Collapsible (Slide-over overlay with topbar toggle)
+  - Fixed Sidebar
+  - Top Navigation (Full-width topbar navbar)
+- 🔒 **Flexible Authorization (`canCustomize`)**: Supports static booleans and dynamic `Closure` callbacks with dependency injection.
+- 🛡️ **Anti-FOUC Engine**: Immediate inline DOM hydration from `localStorage` preventing any layout shift or theme flickering.
+
+---
+
+## 📦 Installation
+
+Install the package via Composer:
 
 ```bash
 composer require cuongpham/filament-theme-customizer
 ```
 
-## Registering in your Filament Panel
+*(Or via GitHub VCS repository in your `composer.json` before publishing to Packagist)*
 
-Add `ThemeCustomizerPlugin::make()` to your panel provider (e.g. `AdminPanelProvider.php`):
+---
+
+## 🚀 Quick Start
+
+### 1. Register in your Filament Panel Provider
+
+Add `ThemeCustomizerPlugin::make()` to your panel configuration (e.g. `app/Providers/Filament/AdminPanelProvider.php`):
 
 ```php
 use CuongPham\FilamentThemeCustomizer\ThemeCustomizerPlugin;
@@ -34,32 +56,72 @@ public function panel(Panel $panel): Panel
         // ...
         ->plugin(
             ThemeCustomizerPlugin::make()
-                // Optional: set custom position (default: 'bottom-right')
+                // Optional: button position ('bottom-right' or 'bottom-left', default: 'bottom-right')
                 ->position('bottom-right')
-                // Optional: authorization condition (boolean or Closure)
+                
+                // Optional: access control (boolean or Closure evaluated at render time)
                 ->canCustomize(fn (): bool => auth()->user()?->hasRole('super_admin') ?? true)
         );
 }
 ```
 
-## Styling & Tailwind Integration
+### 2. Configure Tailwind Theme CSS
 
-In your panel's theme CSS (e.g. `theme.css`), import the customizer stylesheet and include the package views in your `@source` directive:
+In your panel's theme stylesheet (e.g. `resources/css/filament/admin/theme.css`), import the plugin stylesheet and register the view files in your `@source` directive:
 
 ```css
-@import './path-to/packages/filament-theme-customizer/resources/css/theme-customizer.css';
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+@import '../../../../vendor/cuongpham/filament-theme-customizer/resources/css/theme-customizer.css';
 
-@source './path-to/packages/filament-theme-customizer/resources/views/**/*.blade.php';
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+@source '../../../../vendor/cuongpham/filament-theme-customizer/resources/views/**/*.blade.php';
 ```
 
-## Publishing Views
+Then rebuild your assets:
 
-If you wish to customize the blade templates:
+```bash
+npm run build
+```
+
+---
+
+## ⚙️ Configuration & Authorization
+
+### Dynamic Permission Control
+
+The `canCustomize()` method accepts either a boolean or a `Closure`:
+
+```php
+// Grant access only to Super Admins
+ThemeCustomizerPlugin::make()
+    ->canCustomize(fn (): bool => auth()->user()?->can('manage_theme') ?? false)
+
+// Only enable in local development
+ThemeCustomizerPlugin::make()
+    ->canCustomize(app()->isLocal())
+
+// Dependency injection in closure
+ThemeCustomizerPlugin::make()
+    ->canCustomize(function (?\App\Models\User $user): bool {
+        return $user && $user->is_admin;
+    })
+```
+
+---
+
+## 🎨 Publishing Views (Optional)
+
+If you want to customize the Blade templates:
 
 ```bash
 php artisan vendor:publish --tag=filament-theme-customizer-views
 ```
 
-## License
+The views will be published to `resources/views/vendor/filament-theme-customizer`.
 
-MIT License.
+---
+
+## 📄 License
+
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
