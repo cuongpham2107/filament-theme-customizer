@@ -1,18 +1,50 @@
 # 🎨 Filament Theme Customizer (Theme Studio)
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/cuongpham2107/filament-theme-customizer.svg?style=flat-square)](https://packagist.org/packages/cuongpham2107/filament-theme-customizer)
-[![Total Downloads](https://img.shields.io/packagist/dt/cuongpham2107/filament-theme-customizer.svg?style=flat-square)](https://packagist.org/packages/cuongpham2107/filament-theme-customizer)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE.md)
-[![Filament Version](https://img.shields.io/badge/Filament-v5.x-orange?style=flat-square&logo=laravel)](https://filamentphp.com)
+<p align="center">
+  <a href="https://packagist.org/packages/cuongpham2107/filament-theme-customizer">
+    <img src="https://img.shields.io/packagist/v/cuongpham2107/filament-theme-customizer.svg?style=flat-square" alt="Latest Version on Packagist">
+  </a>
+  <a href="https://packagist.org/packages/cuongpham2107/filament-theme-customizer">
+    <img src="https://img.shields.io/packagist/dt/cuongpham2107/filament-theme-customizer.svg?style=flat-square" alt="Total Downloads">
+  </a>
+  <a href="LICENSE.md">
+    <img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square" alt="License: MIT">
+  </a>
+  <a href="https://filamentphp.com">
+    <img src="https://img.shields.io/badge/Filament-v5.x-orange?style=flat-square&logo=laravel" alt="Filament Version">
+  </a>
+</p>
 
 A powerful, elegant, **zero-reload** visual Theme Studio plugin for **Filament v5**. Empowers users and administrators to customize their panel experience in real time with instantaneous live preview, zero flash of unstyled theme (Anti-FOUC), and granular authorization controls.
+
+---
+
+<p align="center">
+  <img src="art/hero-light.png" alt="Filament Theme Studio - Light Mode" width="100%">
+</p>
+
+<p align="center">
+  <img src="art/hero-dark.png" alt="Filament Theme Studio - Obsidian Dark Mode" width="100%">
+</p>
+
+---
+
+## 🖼️ Visual Showcase
+
+| Light Mode (Palettes, Radius & Density) | Obsidian Dark Mode (Violet & Deep Blacks) |
+|:---:|:---:|
+| <img src="art/palette-swatches.png" alt="Color Palettes & Swatches" width="100%"> | <img src="art/dark-palette-swatches.png" alt="Dark Mode Swatches" width="100%"> |
+
+| Velvet Theme (Warm & Soft Curves) | Precision Theme (Crisp Architectural Borders) |
+|:---:|:---:|
+| <img src="art/theme-velvet.png" alt="Velvet Linen Theme" width="100%"> | <img src="art/theme-precision.png" alt="Precision Sharp Theme" width="100%"> |
 
 ---
 
 ## ✨ Features
 
 - ⚡ **Zero-Reload Instant Preview**: Hot-swaps themes, styles, colors, layouts, and typography in real time with zero page refresh.
-- 🎨 **Official Theme Presets**: **Modern**, **Precision**, **Velvet**, and **Obsidian** (matching official Filament theme styling).
+- 🎨 **Official Theme Presets**: **Modern**, **Precision**, **Velvet**, and **Obsidian** (matching official Filament styling).
 - 🌓 **Instant Dark / Light Mode**: Seamless transitions with full Tailwind dark mode compatibility.
 - 🌈 **8 Curated Color Palettes**: Amber, Blue, Forest, Violet, Rose, Teal, Zinc, and Citrus with auto-contrasted primary button text.
 - 🔲 **Live Corner Radius**: None (`0px`), Small (`4px`), Medium (`8px`), Large (`12px`), and Pill (`9999px`).
@@ -36,8 +68,6 @@ Install the package via Composer:
 ```bash
 composer require cuongpham2107/filament-theme-customizer
 ```
-
-*(Or via GitHub VCS repository in your `composer.json` before publishing to Packagist)*
 
 ---
 
