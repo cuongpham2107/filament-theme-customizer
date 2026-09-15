@@ -3,6 +3,7 @@
 namespace CuongPham\FilamentThemeCustomizer;
 
 use Closure;
+use CuongPham\FilamentThemeCustomizer\Services\ThemeSettingsService;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 use Filament\View\PanelsRenderHook;
@@ -10,6 +11,8 @@ use Filament\View\PanelsRenderHook;
 class ThemeCustomizerPlugin implements Plugin
 {
     protected bool | Closure $canCustomize = true;
+
+    protected bool | Closure $canSetGlobalDefault = false;
 
     protected string $position = "bottom-right";
 
@@ -66,17 +69,43 @@ class ThemeCustomizerPlugin implements Plugin
         return (bool) $this->canCustomize;
     }
 
+    /**
+     * Set authorization condition allowing a Super Admin to save the current theme
+     * as the system-wide default for all new users and unauthenticated sessions.
+     */
+    public function canSetGlobalDefault(bool | Closure | null $condition = true): static
+    {
+        $this->canSetGlobalDefault = $condition ?? true;
+
+        return $this;
+    }
+
+    /**
+     * Determine if setting the global default is allowed for current request / user.
+     */
+    public function isGlobalDefaultAllowed(): bool
+    {
+        if ($this->canSetGlobalDefault instanceof Closure) {
+            return (bool) app()->call($this->canSetGlobalDefault);
+        }
+
+        return (bool) $this->canSetGlobalDefault;
+    }
+
     public function register(Panel $panel): void
     {
         if ($this->canCustomize === false) {
             return;
         }
 
+        $panelId = $panel->getId();
+
+        // Always render anti-fouc in <head> using resolved theme (Global or User) to prevent flash
         $panel->renderHook(
             PanelsRenderHook::HEAD_START,
-            fn (): string => $this->isCustomizable()
-                ? view("filament-theme-customizer::anti-fouc")->render()
-                : "",
+            fn (): string => view("filament-theme-customizer::anti-fouc", [
+                "resolvedSettings" => ThemeSettingsService::getResolvedSettings($panelId),
+            ])->render(),
         );
 
         $panel->renderHook(
@@ -91,6 +120,10 @@ class ThemeCustomizerPlugin implements Plugin
             fn (): string => $this->isCustomizable()
                 ? view("filament-theme-customizer::toolbar", [
                     "position" => $this->position,
+                    "panelId" => $panelId,
+                    "resolvedSettings" => ThemeSettingsService::getResolvedSettings($panelId),
+                    "hasCustomUserSettings" => ThemeSettingsService::hasCustomUserSettings($panelId),
+                    "canSetGlobalDefault" => $this->isGlobalDefaultAllowed(),
                 ])->render()
                 : "",
         );

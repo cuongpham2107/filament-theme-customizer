@@ -1,12 +1,26 @@
+@php
+    $resolvedSettings = $resolvedSettings ?? [];
+@endphp
+
 <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
 <link href="https://fonts.bunny.net/css?family=lora:500,600,700|inter:400,500,600,700|outfit:400,500,600,700|plus-jakarta-sans:400,500,600,700|figtree:400,500,600,700|jetbrains-mono:400,500,600&display=swap" rel="stylesheet" />
 
 <script>
     (function () {
         try {
-            const raw = localStorage.getItem('fi_theme_customizer') || localStorage.getItem('fi_official_theme_studio');
-            if (!raw) return;
-            const s = JSON.parse(raw);
+            const server = @json($resolvedSettings);
+            let raw = localStorage.getItem('fi_theme_customizer') || localStorage.getItem('fi_official_theme_studio');
+            let local = null;
+            try {
+                local = raw ? JSON.parse(raw) : null;
+            } catch (err) {
+                local = null;
+            }
+
+            // Merge server settings (User or System Global) with any live local session
+            const s = Object.assign({}, server || {}, local || {});
+            if (!s || Object.keys(s).length === 0) return;
+
             const root = document.documentElement;
 
             let theme = s.theme || 'modern';
@@ -124,7 +138,7 @@
                 document.head.appendChild(styleEl);
             }
 
-            // Sync main content width class immediately on DOM ready (exclude login / simple layout)
+            // Sync main content width class immediately on DOM ready
             document.addEventListener('DOMContentLoaded', () => {
                 if (s.contentWidth) {
                     const main = document.getElementById('fi-main-content');

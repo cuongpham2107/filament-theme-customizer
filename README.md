@@ -56,8 +56,11 @@ A powerful, elegant, **zero-reload** visual Theme Studio plugin for **Filament v
   - Fully Collapsible (Slide-over overlay with topbar toggle)
   - Fixed Sidebar
   - Top Navigation (Full-width topbar navbar)
-- 🔒 **Flexible Authorization (`canCustomize`)**: Supports static booleans and dynamic `Closure` callbacks with dependency injection.
-- 🛡️ **Anti-FOUC Engine**: Immediate inline DOM hydration from `localStorage` preventing any layout shift or theme flickering.
+- 💾 **Database Persistence (User Preferences)**: Saves each user's customized theme to the database (`filament_theme_settings`), seamlessly syncing across their laptops, workstations, and mobile devices.
+- 👑 **Super Admin Global Default**: Super admins can set the active theme as the **System Default** for all guest pages and new users with a single click.
+- ↺ **One-Click Reset to System Default**: Users can instantly revert their custom theme back to the organization's official brand standard.
+- 🔒 **Granular Authorization**: Dual-layer permission controls via `canCustomize()` and `canSetGlobalDefault()` with `Closure` callbacks and dependency injection.
+- 🛡️ **Zero-FOUC Engine**: Ultra-fast server-side inline hydration in `<head>` (< 0.1ms via Cache) preventing layout shift and white flicker.
 
 ---
 
@@ -67,6 +70,7 @@ Install the package via Composer:
 
 ```bash
 composer require cuongpham2107/filament-theme-customizer
+php artisan migrate
 ```
 
 ---
@@ -89,8 +93,11 @@ public function panel(Panel $panel): Panel
                 // Optional: button position ('bottom-right' or 'bottom-left', default: 'bottom-right')
                 ->position('bottom-right')
                 
-                // Optional: access control (boolean or Closure evaluated at render time)
-                ->canCustomize(fn (): bool => auth()->user()?->hasRole('super_admin') ?? true)
+                // 1. Permission to customize and save personal preferences to DB
+                ->canCustomize(fn (): bool => auth()->check())
+                
+                // 2. Permission for Super Admin to set the System-Wide Global Default
+                ->canSetGlobalDefault(fn (): bool => auth()->user()?->hasRole('super_admin') ?? false)
         );
 }
 ```

@@ -13,11 +13,13 @@ class ThemeCustomizerServiceProvider extends PackageServiceProvider
     {
         $package
             ->name(static::$name)
-            ->hasViews();
+            ->hasViews()
+            ->hasMigration('2026_01_01_000000_create_filament_theme_settings_table');
     }
 
     public function packageBooted(): void
     {
-        //
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
     }
 }

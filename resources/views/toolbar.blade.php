@@ -1,11 +1,25 @@
 @php
     $palettesFile = resource_path('js/filament-palettes.json');
     $palettes = file_exists($palettesFile) ? json_decode(file_get_contents($palettesFile), true) : [];
+    $panelId = $panelId ?? 'default';
+    $resolvedSettings = $resolvedSettings ?? [];
+    $hasCustomUserSettings = $hasCustomUserSettings ?? false;
+    $canSetGlobalDefault = $canSetGlobalDefault ?? false;
 @endphp
 
 <div
     x-data="filamentThemeStudio({
-        palettes: {{ Js::from($palettes) }}
+        palettes: {{ Js::from($palettes) }},
+        panelId: {{ Js::from($panelId) }},
+        serverSettings: {{ Js::from($resolvedSettings) }},
+        hasCustomUserSettings: {{ Js::from($hasCustomUserSettings) }},
+        canSetGlobalDefault: {{ Js::from($canSetGlobalDefault) }},
+        csrfToken: '{{ csrf_token() }}',
+        routes: {
+            saveUser: '{{ route('filament-theme-customizer.save-user-settings') }}',
+            resetUser: '{{ route('filament-theme-customizer.reset-user-settings') }}',
+            saveGlobal: '{{ route('filament-theme-customizer.save-global-default') }}',
+        }
     })"
     x-cloak
     class="live-demo-toolbar"
@@ -723,7 +737,86 @@
                 </div>
             </fieldset>
 
-            <!-- 10. Reset & Info -->
+            <!-- 10. Cloud Sync & Persistence -->
+            <fieldset class="live-demo-studio__persistence">
+                <div class="live-demo-studio__label">
+                    <span>Lưu & Đồng bộ</span>
+                    <span
+                        class="live-demo-studio__badge"
+                        :class="hasUserOverride ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' : ''"
+                        x-text="hasUserOverride ? 'Đã cá nhân hóa' : 'Theo mặc định'"
+                    ></span>
+                </div>
+
+                <div class="flex flex-col gap-2 mt-2">
+                    <!-- Save for current user -->
+                    <button
+                        @click="saveUserSettings()"
+                        type="button"
+                        :disabled="isSaving"
+                        class="live-demo-btn-save live-demo-btn-user"
+                    >
+                        <template x-if="isSaving">
+                            <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </template>
+                        <template x-if="!isSaving">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
+                            </svg>
+                        </template>
+                        <span x-text="isSaving ? 'Đang lưu vào tài khoản...' : '💾 Lưu cấu hình của tôi'"></span>
+                    </button>
+
+                    <!-- Reset to system default button (shown if user has custom settings) -->
+                    <button
+                        x-show="hasUserOverride"
+                        @click="resetUserSettings()"
+                        type="button"
+                        :disabled="isResetting"
+                        class="live-demo-btn-save live-demo-btn-reset"
+                    >
+                        <span x-text="isResetting ? 'Đang khôi phục...' : '↺ Về mặc định hệ thống'"></span>
+                    </button>
+
+                    <!-- Super Admin Action -->
+                    @if ($canSetGlobalDefault)
+                        <div class="mt-2 pt-2 border-t border-dashed border-gray-200 dark:border-gray-800">
+                            <button
+                                @click="saveGlobalDefault()"
+                                type="button"
+                                :disabled="isSavingGlobal"
+                                class="live-demo-btn-save live-demo-btn-global"
+                                title="Lưu giao diện này làm mặc định cho toàn bộ khách và mọi người dùng mới"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+                                </svg>
+                                <span x-text="isSavingGlobal ? 'Đang lưu mặc định...' : '⭐ Đặt làm mặc định toàn hệ thống'"></span>
+                            </button>
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1 text-center">Áp dụng cho trang đăng nhập & mọi user mới</p>
+                        </div>
+                    @endif
+
+                    <!-- Notification Feedback Alert -->
+                    <div
+                        x-show="notification.show"
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 -translate-y-1"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 -translate-y-1"
+                        class="live-demo-notification-box"
+                        :class="notification.type === 'success' ? 'is-success' : 'is-error'"
+                        x-text="notification.message"
+                    ></div>
+                </div>
+            </fieldset>
+
+            <!-- 11. Reset & Info -->
             <div class="flex items-center justify-between pt-1 border-t border-gray-200 dark:border-gray-800">
                 <button
                     @click="reset()"
@@ -745,8 +838,27 @@
 
 <script>
     document.addEventListener('alpine:init', () => {
-        Alpine.data('filamentThemeStudio', ({ palettes = {} } = {}) => ({
+        Alpine.data('filamentThemeStudio', ({
+            palettes = {},
+            panelId = 'default',
+            serverSettings = {},
+            hasCustomUserSettings = false,
+            canSetGlobalDefault = false,
+            csrfToken = '',
+            routes = {}
+        } = {}) => ({
             open: false,
+            panelId: panelId,
+            serverSettings: serverSettings,
+            hasUserOverride: Boolean(hasCustomUserSettings),
+            canSetGlobalDefault: Boolean(canSetGlobalDefault),
+            csrfToken: csrfToken,
+            routes: routes,
+            isSaving: false,
+            isResetting: false,
+            isSavingGlobal: false,
+            notification: { show: false, message: '', type: 'success' },
+
             theme: 'modern',
             navLayout: 'sidebar-collapsible',
             sidebarWidth: '20rem',
@@ -879,6 +991,140 @@
                 }
             },
 
+            notify(msg, type = 'success') {
+                this.notification = { show: true, message: msg, type: type };
+                setTimeout(() => {
+                    this.notification.show = false;
+                }, 4000);
+            },
+
+            collectSettings() {
+                return {
+                    theme: this.theme,
+                    surface: this.surface,
+                    contentWidth: this.contentWidth,
+                    navLayout: this.navLayout,
+                    sidebarWidth: this.sidebarWidth,
+                    collapsedWidth: this.collapsedWidth,
+                    radius: this.radius,
+                    spacing: this.spacing,
+                    font: this.font,
+                    fontSize: this.fontSize,
+                    palette: this.palette,
+                    paletteColors: this.palettes[this.palette] || null,
+                    dark: this.dark,
+                };
+            },
+
+            applySettingsObject(s) {
+                if (!s || typeof s !== 'object') return;
+                if (s.theme) this.theme = s.theme;
+                if (s.surface) this.surface = s.surface;
+                if (s.contentWidth) this.contentWidth = s.contentWidth;
+                if (s.navLayout) this.navLayout = s.navLayout;
+                if (s.sidebarWidth) this.sidebarWidth = s.sidebarWidth;
+                if (s.collapsedWidth) this.collapsedWidth = s.collapsedWidth;
+                if (s.radius) this.radius = s.radius;
+                if (s.spacing) this.spacing = s.spacing;
+                if (s.font) this.font = s.font;
+                if (s.fontSize) this.fontSize = s.fontSize;
+                if (s.palette) this.palette = s.palette;
+                if (s.dark !== undefined) this.dark = Boolean(s.dark);
+                this.applyTheme();
+                this.saveSettings();
+            },
+
+            async saveUserSettings() {
+                this.isSaving = true;
+                try {
+                    const res = await fetch(this.routes.saveUser, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': this.csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            panel: this.panelId,
+                            settings: this.collectSettings()
+                        })
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                        this.hasUserOverride = true;
+                        this.notify(data.message || '✓ Đã lưu cấu hình cá nhân của bạn!', 'success');
+                    } else {
+                        this.notify(data.error || 'Lỗi khi lưu cấu hình.', 'error');
+                    }
+                } catch (e) {
+                    this.notify('Lỗi kết nối máy chủ.', 'error');
+                } finally {
+                    this.isSaving = false;
+                }
+            },
+
+            async resetUserSettings() {
+                this.isResetting = true;
+                try {
+                    const res = await fetch(this.routes.resetUser, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': this.csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ panel: this.panelId })
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                        this.hasUserOverride = false;
+                        if (data.settings) {
+                            this.applySettingsObject(data.settings);
+                        } else {
+                            this.reset();
+                        }
+                        this.notify(data.message || '✓ Đã khôi phục về mặc định hệ thống!', 'success');
+                    } else {
+                        this.notify(data.error || 'Lỗi khi khôi phục.', 'error');
+                    }
+                } catch (e) {
+                    this.notify('Lỗi kết nối máy chủ.', 'error');
+                } finally {
+                    this.isResetting = false;
+                }
+            },
+
+            async saveGlobalDefault() {
+                if (!confirm('Bạn có chắc muốn đặt giao diện hiện tại làm MẶC ĐỊNH cho toàn bộ hệ thống & người dùng mới?')) {
+                    return;
+                }
+                this.isSavingGlobal = true;
+                try {
+                    const res = await fetch(this.routes.saveGlobal, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': this.csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            panel: this.panelId,
+                            settings: this.collectSettings()
+                        })
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                        this.notify(data.message || '⭐ Đã lưu làm mặc định toàn hệ thống!', 'success');
+                    } else {
+                        this.notify(data.error || 'Lỗi khi lưu mặc định toàn hệ thống.', 'error');
+                    }
+                } catch (e) {
+                    this.notify('Lỗi kết nối máy chủ.', 'error');
+                } finally {
+                    this.isSavingGlobal = false;
+                }
+            },
+
             init() {
                 this.loadSettings();
 
@@ -890,8 +1136,12 @@
             loadSettings() {
                 try {
                     const raw = localStorage.getItem('fi_theme_customizer') || localStorage.getItem('fi_official_theme_studio');
+                    let parsed = null;
                     if (raw) {
-                        const s = JSON.parse(raw);
+                        try { parsed = JSON.parse(raw); } catch (e) {}
+                    }
+                    const s = Object.assign({}, this.serverSettings || {}, parsed || {});
+                    if (s) {
                         if (s.theme) {
                             let t = s.theme;
                             if (t === 'default') t = 'modern';
@@ -911,8 +1161,12 @@
                         if (s.fontSize) this.fontSize = s.fontSize;
                         if (s.spacing) this.spacing = s.spacing;
                         else if (s.compact) this.spacing = 'compact';
+                        if (s.dark !== undefined) {
+                            this.dark = Boolean(s.dark);
+                        } else {
+                            this.dark = localStorage.getItem('theme') === 'dark' || document.documentElement.classList.contains('dark');
+                        }
                     }
-                    this.dark = localStorage.getItem('theme') === 'dark' || document.documentElement.classList.contains('dark');
                 } catch (e) {}
 
                 if (window.Alpine && window.Alpine.store('sidebar')) {
