@@ -5,6 +5,19 @@
     $resolvedSettings = $resolvedSettings ?? [];
     $hasCustomUserSettings = $hasCustomUserSettings ?? false;
     $canSetGlobalDefault = $canSetGlobalDefault ?? false;
+    $translations = [
+        'themes' => collect(__('filament-theme-customizer::toolbar.themes'))->map(fn (array $theme): string => $theme['label'])->all(),
+        'navLayouts' => collect(__('filament-theme-customizer::toolbar.nav_layouts'))->map(fn (array $layout): string => $layout['badge'])->all(),
+        'surfaces' => __('filament-theme-customizer::toolbar.surfaces'),
+        'palettes' => __('filament-theme-customizer::toolbar.palettes'),
+        'spacings' => collect(__('filament-theme-customizer::toolbar.spacings'))->map(fn (array $spacing): string => $spacing['label'])->all(),
+        'widths' => [
+            'full' => __('filament-theme-customizer::toolbar.content_widths.full_badge'),
+            'prose' => __('filament-theme-customizer::toolbar.content_widths.prose'),
+        ],
+        'radii' => __('filament-theme-customizer::toolbar.radii'),
+        'notifications' => __('filament-theme-customizer::toolbar.notifications'),
+    ];
 @endphp
 
 <div
@@ -14,6 +27,7 @@
         serverSettings: {{ Js::from($resolvedSettings) }},
         hasCustomUserSettings: {{ Js::from($hasCustomUserSettings) }},
         canSetGlobalDefault: {{ Js::from($canSetGlobalDefault) }},
+        translations: {{ Js::from($translations) }},
         csrfToken: '{{ csrf_token() }}',
         routes: {
             saveUser: '{{ route('filament-theme-customizer.save-user-settings') }}',
@@ -29,10 +43,10 @@
         @click="open = !open"
         type="button"
         class="live-demo-launcher"
-        title="Customize Theme & Layout"
-        aria-label="Customize Theme & Layout"
+        title="{{ __('filament-theme-customizer::toolbar.launcher.title') }}"
+        aria-label="{{ __('filament-theme-customizer::toolbar.launcher.title') }}"
     >
-        <span class="live-demo-launcher__label" aria-hidden="true">Theme Studio</span>
+        <span class="live-demo-launcher__label" aria-hidden="true">{{ __('filament-theme-customizer::toolbar.launcher.label') }}</span>
         <svg class="live-demo-launcher__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 0 0 5.304 0l6.401-6.402M6.75 21A3.75 3.75 0 0 1 3 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 0 0 3.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008Z" />
         </svg>
@@ -49,19 +63,19 @@
         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
         x-transition:leave-end="opacity-0 translate-y-3 scale-95"
         class="live-demo-studio"
-        aria-label="Theme Studio"
+        aria-label="{{ __('filament-theme-customizer::toolbar.launcher.label') }}"
     >
         <!-- Header -->
         <header class="live-demo-studio__header">
             <div>
-                <h2>Filament Theme Studio</h2>
-                <p>Zero-reload instantaneous customization</p>
+                <h2>{{ __('filament-theme-customizer::toolbar.heading') }}</h2>
+                <p>{{ __('filament-theme-customizer::toolbar.subheading') }}</p>
             </div>
             <button
                 @click="open = false"
                 type="button"
                 class="live-demo-studio__close"
-                aria-label="Close"
+                aria-label="{{ __('filament-theme-customizer::toolbar.close') }}"
             >
                 <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
@@ -74,7 +88,7 @@
             <!-- 1. Theme Presets (100% Free & Distinct Modern Themes) -->
             <fieldset>
                 <div class="live-demo-studio__label">
-                    <span>Theme Preset</span>
+                    <span>{{ __('filament-theme-customizer::toolbar.sections.theme') }}</span>
                     <span class="live-demo-studio__badge" x-text="getThemeLabel()"></span>
                 </div>
                 <div class="live-demo-studio__theme-grid">
@@ -87,8 +101,8 @@
                             :checked="theme === 'modern' || theme === 'default'"
                             @change="setTheme('modern')"
                         />
-                        <span class="live-demo-theme__name">Modern</span>
-                        <span class="live-demo-theme__description">Clean & balanced</span>
+                        <span class="live-demo-theme__name">{{ __('filament-theme-customizer::toolbar.themes.modern.label') }}</span>
+                        <span class="live-demo-theme__description">{{ __('filament-theme-customizer::toolbar.themes.modern.description') }}</span>
                     </label>
 
                     <!-- Precision -->
@@ -100,8 +114,8 @@
                             :checked="theme === 'precision' || theme === 'sharp'"
                             @change="setTheme('precision')"
                         />
-                        <span class="live-demo-theme__name">Precision</span>
-                        <span class="live-demo-theme__description">Crisp & architectural</span>
+                        <span class="live-demo-theme__name">{{ __('filament-theme-customizer::toolbar.themes.precision.label') }}</span>
+                        <span class="live-demo-theme__description">{{ __('filament-theme-customizer::toolbar.themes.precision.description') }}</span>
                     </label>
 
                     <!-- Velvet -->
@@ -113,8 +127,8 @@
                             :checked="theme === 'velvet' || theme === 'soft'"
                             @change="setTheme('velvet')"
                         />
-                        <span class="live-demo-theme__name">Velvet</span>
-                        <span class="live-demo-theme__description">Warm & soft curves</span>
+                        <span class="live-demo-theme__name">{{ __('filament-theme-customizer::toolbar.themes.velvet.label') }}</span>
+                        <span class="live-demo-theme__description">{{ __('filament-theme-customizer::toolbar.themes.velvet.description') }}</span>
                     </label>
 
                     <!-- Obsidian -->
@@ -126,8 +140,8 @@
                             :checked="theme === 'obsidian' || theme === 'noir'"
                             @change="setTheme('obsidian')"
                         />
-                        <span class="live-demo-theme__name">Obsidian</span>
-                        <span class="live-demo-theme__description">High-contrast dark depth</span>
+                        <span class="live-demo-theme__name">{{ __('filament-theme-customizer::toolbar.themes.obsidian.label') }}</span>
+                        <span class="live-demo-theme__description">{{ __('filament-theme-customizer::toolbar.themes.obsidian.description') }}</span>
                     </label>
                 </div>
             </fieldset>
@@ -135,8 +149,8 @@
             <!-- 2. Color Mode (Light / Dark) -->
             <fieldset>
                 <div class="live-demo-studio__label">
-                    <span>Color Mode</span>
-                    <span class="live-demo-studio__badge" x-text="dark ? 'Dark' : 'Light'"></span>
+                    <span>{{ __('filament-theme-customizer::toolbar.sections.color_mode') }}</span>
+                    <span class="live-demo-studio__badge" x-text="dark ? {{ Js::from(__('filament-theme-customizer::toolbar.color_modes.dark')) }} : {{ Js::from(__('filament-theme-customizer::toolbar.color_modes.light')) }}"></span>
                 </div>
                 <div class="live-demo-segmented">
                     <button
@@ -148,7 +162,7 @@
                         <svg class="w-3.5 h-3.5 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
                         </svg>
-                        <span>Light</span>
+                        <span>{{ __('filament-theme-customizer::toolbar.color_modes.light') }}</span>
                     </button>
                     <button
                         @click="setDark(true)"
@@ -159,7 +173,7 @@
                         <svg class="w-3.5 h-3.5 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
                         </svg>
-                        <span>Dark</span>
+                        <span>{{ __('filament-theme-customizer::toolbar.color_modes.dark') }}</span>
                     </button>
                 </div>
             </fieldset>
@@ -167,7 +181,7 @@
                         <!-- Navigation Layout (Zero-Reload) -->
             <fieldset>
                 <div class="live-demo-studio__label">
-                    <span>Navigation Layout</span>
+                    <span>{{ __('filament-theme-customizer::toolbar.sections.nav_layout') }}</span>
                     <span class="live-demo-studio__badge" x-text="getNavLayoutLabel()"></span>
                 </div>
                 <div class="live-demo-segmented">
@@ -176,44 +190,44 @@
                         type="button"
                         class="live-demo-segmented-item"
                         :class="navLayout === 'sidebar-collapsible' ? 'is-active' : ''"
-                        title="Collapsible on Desktop (Icons only)"
+                        title="{{ __('filament-theme-customizer::toolbar.nav_layouts.sidebar-collapsible.title') }}"
                     >
-                        Collapsible
+                        {{ __('filament-theme-customizer::toolbar.nav_layouts.sidebar-collapsible.label') }}
                     </button>
                     <button
                         @click="setNavLayout('sidebar-fully-collapsible')"
                         type="button"
                         class="live-demo-segmented-item"
                         :class="navLayout === 'sidebar-fully-collapsible' ? 'is-active' : ''"
-                        title="Fully Collapsible (Slides offscreen)"
+                        title="{{ __('filament-theme-customizer::toolbar.nav_layouts.sidebar-fully-collapsible.title') }}"
                     >
-                        Slide
+                        {{ __('filament-theme-customizer::toolbar.nav_layouts.sidebar-fully-collapsible.label') }}
                     </button>
                     <button
                         @click="setNavLayout('sidebar-fixed')"
                         type="button"
                         class="live-demo-segmented-item"
                         :class="navLayout === 'sidebar-fixed' ? 'is-active' : ''"
-                        title="Fixed Expanded Sidebar"
+                        title="{{ __('filament-theme-customizer::toolbar.nav_layouts.sidebar-fixed.title') }}"
                     >
-                        Fixed
+                        {{ __('filament-theme-customizer::toolbar.nav_layouts.sidebar-fixed.label') }}
                     </button>
                     <button
                         @click="setNavLayout('top')"
                         type="button"
                         class="live-demo-segmented-item"
                         :class="navLayout === 'top' ? 'is-active' : ''"
-                        title="Top Navigation Bar (Horizontal)"
+                        title="{{ __('filament-theme-customizer::toolbar.nav_layouts.top.title') }}"
                     >
-                        Top Nav
+                        {{ __('filament-theme-customizer::toolbar.nav_layouts.top.label') }}
                     </button>
                 </div>
             </fieldset>
 
-            <!-- Sidebar Width (Độ rộng khi hiển thị) -->
+            <!-- Sidebar Width (width when expanded) -->
             <fieldset x-show="navLayout !== 'top'">
                 <div class="live-demo-studio__label">
-                    <span>Sidebar Width</span>
+                    <span>{{ __('filament-theme-customizer::toolbar.sections.sidebar_width') }}</span>
                     <span class="live-demo-studio__badge" x-text="sidebarWidth"></span>
                 </div>
                 <div class="live-demo-segmented">
@@ -222,7 +236,7 @@
                         type="button"
                         class="live-demo-segmented-item"
                         :class="sidebarWidth === '16rem' ? 'is-active' : ''"
-                        title="Slim (16rem / 256px)"
+                        title="{{ __('filament-theme-customizer::toolbar.sidebar_widths.slim') }}"
                     >
                         16rem
                     </button>
@@ -231,7 +245,7 @@
                         type="button"
                         class="live-demo-segmented-item"
                         :class="sidebarWidth === '18rem' ? 'is-active' : ''"
-                        title="Compact (18rem / 288px)"
+                        title="{{ __('filament-theme-customizer::toolbar.sidebar_widths.compact') }}"
                     >
                         18rem
                     </button>
@@ -240,7 +254,7 @@
                         type="button"
                         class="live-demo-segmented-item"
                         :class="sidebarWidth === '20rem' ? 'is-active' : ''"
-                        title="Default (20rem / 320px)"
+                        title="{{ __('filament-theme-customizer::toolbar.sidebar_widths.default') }}"
                     >
                         20rem
                     </button>
@@ -249,7 +263,7 @@
                         type="button"
                         class="live-demo-segmented-item"
                         :class="sidebarWidth === '22rem' ? 'is-active' : ''"
-                        title="Wide (22rem / 352px)"
+                        title="{{ __('filament-theme-customizer::toolbar.sidebar_widths.wide') }}"
                     >
                         22rem
                     </button>
@@ -258,7 +272,7 @@
                         type="button"
                         class="live-demo-segmented-item"
                         :class="sidebarWidth === '24rem' ? 'is-active' : ''"
-                        title="Comfortable (24rem / 384px)"
+                        title="{{ __('filament-theme-customizer::toolbar.sidebar_widths.comfortable') }}"
                     >
                         24rem
                     </button>
@@ -268,7 +282,7 @@
             <!-- 3. Maximum Content Width (Zero-Reload) -->
             <fieldset>
                 <div class="live-demo-studio__label">
-                    <span>Content Width</span>
+                    <span>{{ __('filament-theme-customizer::toolbar.sections.content_width') }}</span>
                     <span class="live-demo-studio__badge" x-text="getWidthLabel()"></span>
                 </div>
                 <div class="live-demo-segmented">
@@ -277,16 +291,16 @@
                         type="button"
                         class="live-demo-segmented-item"
                         :class="contentWidth === 'full' ? 'is-active' : ''"
-                        title="100% Full Width (Edge to Edge)"
+                        title="{{ __('filament-theme-customizer::toolbar.content_widths.full_title') }}"
                     >
-                        Full
+                        {{ __('filament-theme-customizer::toolbar.content_widths.full') }}
                     </button>
                     <button
                         @click="setContentWidth('screen-2xl')"
                         type="button"
                         class="live-demo-segmented-item"
                         :class="contentWidth === 'screen-2xl' ? 'is-active' : ''"
-                        title="Ultrawide 1536px (Screen 2XL)"
+                        title="{{ __('filament-theme-customizer::toolbar.content_widths.screen_2xl_title') }}"
                     >
                         2XL
                     </button>
@@ -295,7 +309,7 @@
                         type="button"
                         class="live-demo-segmented-item"
                         :class="contentWidth === '7xl' ? 'is-active' : ''"
-                        title="Default 1280px (7XL)"
+                        title="{{ __('filament-theme-customizer::toolbar.content_widths.7xl_title') }}"
                     >
                         7XL
                     </button>
@@ -320,22 +334,22 @@
                 </div>
                 <!-- Custom Scale Dropdown (All Filament Width Enums) -->
                 <div class="mt-1.5 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
-                    <span>Tailwind scale:</span>
+                    <span>{{ __('filament-theme-customizer::toolbar.content_widths.scale') }}</span>
                     <select
                         :value="contentWidth"
                         @change="setContentWidth($event.target.value)"
                         class="text-[11px] py-0.5 px-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer"
                     >
-                        <optgroup label="Full & Screen Scale">
-                            <option value="full">Full (100% Edge-to-Edge)</option>
+                        <optgroup label="{{ __('filament-theme-customizer::toolbar.content_widths.group_screen') }}">
+                            <option value="full">{{ __('filament-theme-customizer::toolbar.content_widths.option_full') }}</option>
                             <option value="screen-2xl">Screen 2XL (1536px)</option>
                             <option value="screen-xl">Screen XL (1280px)</option>
                             <option value="screen-lg">Screen LG (1024px)</option>
                             <option value="screen-md">Screen MD (768px)</option>
                             <option value="screen-sm">Screen SM (640px)</option>
                         </optgroup>
-                        <optgroup label="Standard Max-Width Scale">
-                            <option value="7xl">7XL (1280px - Default)</option>
+                        <optgroup label="{{ __('filament-theme-customizer::toolbar.content_widths.group_standard') }}">
+                            <option value="7xl">{{ __('filament-theme-customizer::toolbar.content_widths.option_7xl') }}</option>
                             <option value="6xl">6XL (1152px)</option>
                             <option value="5xl">5XL (1024px)</option>
                             <option value="4xl">4XL (896px)</option>
@@ -349,11 +363,11 @@
                             <option value="2xs">2XS (288px)</option>
                             <option value="3xs">3XS (256px)</option>
                         </optgroup>
-                        <optgroup label="Content Scale">
-                            <option value="prose">Prose (65ch text)</option>
-                            <option value="fit">Fit Content</option>
-                            <option value="max">Max Content</option>
-                            <option value="min">Min Content</option>
+                        <optgroup label="{{ __('filament-theme-customizer::toolbar.content_widths.group_content') }}">
+                            <option value="prose">{{ __('filament-theme-customizer::toolbar.content_widths.option_prose') }}</option>
+                            <option value="fit">{{ __('filament-theme-customizer::toolbar.content_widths.option_fit') }}</option>
+                            <option value="max">{{ __('filament-theme-customizer::toolbar.content_widths.option_max') }}</option>
+                            <option value="min">{{ __('filament-theme-customizer::toolbar.content_widths.option_min') }}</option>
                         </optgroup>
                     </select>
                 </div>
@@ -362,7 +376,7 @@
             <!-- 4. Background Surface -->
             <fieldset>
                 <div class="live-demo-studio__label">
-                    <span>Background Surface</span>
+                    <span>{{ __('filament-theme-customizer::toolbar.sections.surface') }}</span>
                     <span class="live-demo-studio__badge" x-text="getSurfaceLabel()"></span>
                 </div>
                 <div class="live-demo-segmented">
@@ -372,7 +386,7 @@
                         class="live-demo-segmented-item"
                         :class="surface === 'default' ? 'is-active' : ''"
                     >
-                        Default
+                        {{ __('filament-theme-customizer::toolbar.surfaces.default') }}
                     </button>
                     <button
                         @click="setSurface('linen')"
@@ -380,7 +394,7 @@
                         class="live-demo-segmented-item"
                         :class="surface === 'linen' ? 'is-active' : ''"
                     >
-                        Linen
+                        {{ __('filament-theme-customizer::toolbar.surfaces.linen') }}
                     </button>
                     <button
                         @click="setSurface('slate')"
@@ -388,7 +402,7 @@
                         class="live-demo-segmented-item"
                         :class="surface === 'slate' ? 'is-active' : ''"
                     >
-                        Slate
+                        {{ __('filament-theme-customizer::toolbar.surfaces.slate') }}
                     </button>
                     <button
                         @click="setSurface('stone')"
@@ -396,7 +410,7 @@
                         class="live-demo-segmented-item"
                         :class="surface === 'stone' ? 'is-active' : ''"
                     >
-                        Stone
+                        {{ __('filament-theme-customizer::toolbar.surfaces.stone') }}
                     </button>
                     <button
                         @click="setSurface('pure')"
@@ -404,7 +418,7 @@
                         class="live-demo-segmented-item"
                         :class="surface === 'pure' ? 'is-active' : ''"
                     >
-                        Pure
+                        {{ __('filament-theme-customizer::toolbar.surfaces.pure') }}
                     </button>
                 </div>
             </fieldset>
@@ -412,7 +426,7 @@
             <!-- 5. Primary Color Swatches -->
             <fieldset>
                 <div class="live-demo-studio__label">
-                    <span>Primary Color</span>
+                    <span>{{ __('filament-theme-customizer::toolbar.sections.primary_color') }}</span>
                     <span class="live-demo-studio__badge flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full inline-block shadow-xs" :style="'background-color: var(--primary-500, #f59e0b);'"></span>
                         <span x-text="getPaletteLabel()"></span>
@@ -425,7 +439,7 @@
                         class="live-demo-palette-btn"
                         :class="palette === 'amber' ? 'is-active' : ''"
                         style="background-color: #f59e0b;"
-                        title="Amber"
+                        title="{{ __('filament-theme-customizer::toolbar.palettes.amber') }}"
                     ></button>
                     <button
                         @click="setPalette('blue')"
@@ -433,7 +447,7 @@
                         class="live-demo-palette-btn"
                         :class="palette === 'blue' ? 'is-active' : ''"
                         style="background-color: #3b82f6;"
-                        title="Blue"
+                        title="{{ __('filament-theme-customizer::toolbar.palettes.blue') }}"
                     ></button>
                     <button
                         @click="setPalette('forest')"
@@ -441,7 +455,7 @@
                         class="live-demo-palette-btn"
                         :class="palette === 'forest' ? 'is-active' : ''"
                         style="background-color: #10b981;"
-                        title="Forest Green"
+                        title="{{ __('filament-theme-customizer::toolbar.palettes.forest') }}"
                     ></button>
                     <button
                         @click="setPalette('citrus')"
@@ -449,7 +463,7 @@
                         class="live-demo-palette-btn"
                         :class="palette === 'citrus' ? 'is-active' : ''"
                         style="background-color: #f97316;"
-                        title="Citrus Orange"
+                        title="{{ __('filament-theme-customizer::toolbar.palettes.citrus') }}"
                     ></button>
                     <button
                         @click="setPalette('violet')"
@@ -457,7 +471,7 @@
                         class="live-demo-palette-btn"
                         :class="palette === 'violet' ? 'is-active' : ''"
                         style="background-color: #8b5cf6;"
-                        title="Violet"
+                        title="{{ __('filament-theme-customizer::toolbar.palettes.violet') }}"
                     ></button>
                     <button
                         @click="setPalette('rose')"
@@ -465,7 +479,7 @@
                         class="live-demo-palette-btn"
                         :class="palette === 'rose' ? 'is-active' : ''"
                         style="background-color: #f43f5e;"
-                        title="Rose"
+                        title="{{ __('filament-theme-customizer::toolbar.palettes.rose') }}"
                     ></button>
                     <button
                         @click="setPalette('teal')"
@@ -473,7 +487,7 @@
                         class="live-demo-palette-btn"
                         :class="palette === 'teal' ? 'is-active' : ''"
                         style="background-color: #14b8a6;"
-                        title="Teal"
+                        title="{{ __('filament-theme-customizer::toolbar.palettes.teal') }}"
                     ></button>
                     <button
                         @click="setPalette('zinc')"
@@ -481,7 +495,7 @@
                         class="live-demo-palette-btn"
                         :class="palette === 'zinc' ? 'is-active' : ''"
                         style="background-color: #71717a;"
-                        title="Zinc"
+                        title="{{ __('filament-theme-customizer::toolbar.palettes.zinc') }}"
                     ></button>
                 </div>
             </fieldset>
@@ -489,7 +503,7 @@
             <!-- 6. Border Radius -->
             <fieldset>
                 <div class="live-demo-studio__label">
-                    <span>Border Radius</span>
+                    <span>{{ __('filament-theme-customizer::toolbar.sections.radius') }}</span>
                     <span class="live-demo-studio__badge" x-text="getRadiusLabel()"></span>
                 </div>
                 <div class="live-demo-segmented">
@@ -539,7 +553,7 @@
                         class="live-demo-segmented-item"
                         :class="radius === 'full' ? 'is-active' : ''"
                     >
-                        Pill
+                        {{ __('filament-theme-customizer::toolbar.radii.pill') }}
                     </button>
                 </div>
             </fieldset>
@@ -547,7 +561,7 @@
             <!-- 7. Spacing / Density (Compact controls) -->
             <fieldset>
                 <div class="live-demo-studio__label">
-                    <span>Spacing & Density</span>
+                    <span>{{ __('filament-theme-customizer::toolbar.sections.spacing') }}</span>
                     <span class="live-demo-studio__badge" x-text="getSpacingLabel()"></span>
                 </div>
                 <div class="live-demo-segmented">
@@ -556,36 +570,36 @@
                         type="button"
                         class="live-demo-segmented-item"
                         :class="spacing === 'tight' ? 'is-active' : ''"
-                        title="Ultra-compact tables and forms"
+                        title="{{ __('filament-theme-customizer::toolbar.spacings.tight.title') }}"
                     >
-                        Tight
+                        {{ __('filament-theme-customizer::toolbar.spacings.tight.label') }}
                     </button>
                     <button
                         @click="setSpacing('compact')"
                         type="button"
                         class="live-demo-segmented-item"
                         :class="spacing === 'compact' ? 'is-active' : ''"
-                        title="Compact desktop view ($29 USD)"
+                        title="{{ __('filament-theme-customizer::toolbar.spacings.compact.title') }}"
                     >
-                        Compact
+                        {{ __('filament-theme-customizer::toolbar.spacings.compact.label') }}
                     </button>
                     <button
                         @click="setSpacing('comfortable')"
                         type="button"
                         class="live-demo-segmented-item"
                         :class="spacing === 'comfortable' ? 'is-active' : ''"
-                        title="Standard comfortable spacing"
+                        title="{{ __('filament-theme-customizer::toolbar.spacings.comfortable.title') }}"
                     >
-                        Normal
+                        {{ __('filament-theme-customizer::toolbar.spacings.comfortable.label') }}
                     </button>
                     <button
                         @click="setSpacing('spacious')"
                         type="button"
                         class="live-demo-segmented-item"
                         :class="spacing === 'spacious' ? 'is-active' : ''"
-                        title="Airy and relaxed spacing"
+                        title="{{ __('filament-theme-customizer::toolbar.spacings.spacious.title') }}"
                     >
-                        Spacious
+                        {{ __('filament-theme-customizer::toolbar.spacings.spacious.label') }}
                     </button>
                 </div>
             </fieldset>
@@ -593,7 +607,7 @@
             <!-- 8. Font Family -->
             <fieldset>
                 <div class="live-demo-studio__label">
-                    <span>Font Family</span>
+                    <span>{{ __('filament-theme-customizer::toolbar.sections.font') }}</span>
                     <span class="live-demo-studio__badge" x-text="font"></span>
                 </div>
                 <div class="live-demo-font-grid">
@@ -657,7 +671,7 @@
             <!-- 9. Font Size Scale (Compact Filament-Style Slider) -->
             <fieldset class="space-y-2">
                 <div class="live-demo-studio__label">
-                    <span>Font Size</span>
+                    <span>{{ __('filament-theme-customizer::toolbar.sections.font_size') }}</span>
                     <span class="live-demo-studio__badge" x-text="getFontSizeLabel()"></span>
                 </div>
                 
@@ -706,7 +720,7 @@
                                 :value="percent"
                                 @input="setFontSizeFromPercent($event.target.value)"
                                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                aria-label="Font Size Slider"
+                                aria-label="{{ __('filament-theme-customizer::toolbar.font_size_slider') }}"
                             />
                         </div>
 
@@ -740,11 +754,11 @@
             <!-- 10. Cloud Sync & Persistence -->
             <fieldset class="live-demo-studio__persistence">
                 <div class="live-demo-studio__label">
-                    <span>Lưu & Đồng bộ</span>
+                    <span>{{ __('filament-theme-customizer::toolbar.persistence.heading') }}</span>
                     <span
                         class="live-demo-studio__badge"
                         :class="hasUserOverride ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' : ''"
-                        x-text="hasUserOverride ? 'Đã cá nhân hóa' : 'Theo mặc định'"
+                        x-text="hasUserOverride ? {{ Js::from(__('filament-theme-customizer::toolbar.persistence.customized')) }} : {{ Js::from(__('filament-theme-customizer::toolbar.persistence.using_default')) }}"
                     ></span>
                 </div>
 
@@ -767,7 +781,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
                             </svg>
                         </template>
-                        <span x-text="isSaving ? 'Đang lưu vào tài khoản...' : '💾 Lưu cấu hình của tôi'"></span>
+                        <span x-text="isSaving ? {{ Js::from(__('filament-theme-customizer::toolbar.persistence.saving_user')) }} : {{ Js::from(__('filament-theme-customizer::toolbar.persistence.save_user')) }}"></span>
                     </button>
 
                     <!-- Reset to system default button (shown if user has custom settings) -->
@@ -778,7 +792,7 @@
                         :disabled="isResetting"
                         class="live-demo-btn-save live-demo-btn-reset"
                     >
-                        <span x-text="isResetting ? 'Đang khôi phục...' : '↺ Về mặc định hệ thống'"></span>
+                        <span x-text="isResetting ? {{ Js::from(__('filament-theme-customizer::toolbar.persistence.resetting_user')) }} : {{ Js::from(__('filament-theme-customizer::toolbar.persistence.reset_user')) }}"></span>
                     </button>
 
                     <!-- Super Admin Action -->
@@ -789,14 +803,14 @@
                                 type="button"
                                 :disabled="isSavingGlobal"
                                 class="live-demo-btn-save live-demo-btn-global"
-                                title="Lưu giao diện này làm mặc định cho toàn bộ khách và mọi người dùng mới"
+                                title="{{ __('filament-theme-customizer::toolbar.persistence.save_global_title') }}"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
                                 </svg>
-                                <span x-text="isSavingGlobal ? 'Đang lưu mặc định...' : '⭐ Đặt làm mặc định toàn hệ thống'"></span>
+                                <span x-text="isSavingGlobal ? {{ Js::from(__('filament-theme-customizer::toolbar.persistence.saving_global')) }} : {{ Js::from(__('filament-theme-customizer::toolbar.persistence.save_global')) }}"></span>
                             </button>
-                            <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1 text-center">Áp dụng cho trang đăng nhập & mọi user mới</p>
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1 text-center">{{ __('filament-theme-customizer::toolbar.persistence.save_global_hint') }}</p>
                         </div>
                     @endif
 
@@ -823,14 +837,16 @@
                     type="button"
                     class="text-xs text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition"
                 >
-                    Reset all default
+                    {{ __('filament-theme-customizer::toolbar.reset_all') }}
                 </button>
-                <span class="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                    </svg>
-                    <span>Free Plugin</span>
-                </span>
+                @if (config('filament-theme-customizer.show_credit', false))
+                    <span class="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                        <span>{{ __('filament-theme-customizer::toolbar.credit') }}</span>
+                    </span>
+                @endif
             </div>
         </div>
     </section>
@@ -845,7 +861,8 @@
             hasCustomUserSettings = false,
             canSetGlobalDefault = false,
             csrfToken = '',
-            routes = {}
+            routes = {},
+            translations = {}
         } = {}) => ({
             open: false,
             panelId: panelId,
@@ -854,6 +871,7 @@
             canSetGlobalDefault: Boolean(canSetGlobalDefault),
             csrfToken: csrfToken,
             routes: routes,
+            translations: translations,
             isSaving: false,
             isResetting: false,
             isSavingGlobal: false,
@@ -875,22 +893,14 @@
 
             
             getThemeLabel() {
-                const map = {
-                    modern: 'Modern',
-                    default: 'Modern',
-                    precision: 'Precision',
-                    sharp: 'Precision',
-                    velvet: 'Velvet',
-                    soft: 'Velvet',
-                    obsidian: 'Obsidian',
-                    noir: 'Obsidian',
-                };
-                return map[this.theme] || this.theme;
+                const aliases = { default: 'modern', sharp: 'precision', soft: 'velvet', noir: 'obsidian' };
+                const key = aliases[this.theme] || this.theme;
+                return this.translations.themes?.[key] || this.theme;
             },
 
             getWidthLabel() {
                 const map = {
-                    full: 'Full (100%)',
+                    full: this.translations.widths?.full || 'Full (100%)',
                     'screen-2xl': '2XL (1536px)',
                     '7xl': '7XL (1280px)',
                     '6xl': '6XL (1152px)',
@@ -903,56 +913,35 @@
                     md: 'MD (448px)',
                     sm: 'SM (384px)',
                     xs: 'XS (320px)',
-                    prose: 'Prose',
+                    prose: this.translations.widths?.prose || 'Prose',
                 };
                 return map[this.contentWidth] || this.contentWidth.toUpperCase();
             },
 
             getSurfaceLabel() {
-                const map = {
-                    default: 'Default',
-                    linen: 'Linen',
-                    slate: 'Slate',
-                    stone: 'Stone',
-                    pure: 'Pure',
-                };
-                return map[this.surface] || this.surface;
+                return this.translations.surfaces?.[this.surface] || this.surface;
             },
 
             getPaletteLabel() {
-                const map = {
-                    amber: 'Amber',
-                    blue: 'Blue',
-                    emerald: 'Forest Green',
-                    orange: 'Citrus Orange',
-                    purple: 'Violet',
-                    rose: 'Rose',
-                    teal: 'Teal',
-                    zinc: 'Zinc',
-                };
-                return map[this.palette] || this.palette;
+                const aliases = { emerald: 'forest', orange: 'citrus', purple: 'violet' };
+                const key = aliases[this.palette] || this.palette;
+                return this.translations.palettes?.[key] || this.palette;
             },
 
             getRadiusLabel() {
                 const map = {
-                    '0': '0px (Sharp)',
+                    '0': this.translations.radii?.sharp || '0px (Sharp)',
                     sm: 'Sm (4px)',
                     md: 'Md (8px)',
                     lg: 'Lg (12px)',
                     xl: 'Xl (16px)',
-                    full: 'Pill',
+                    full: this.translations.radii?.pill || 'Pill',
                 };
                 return map[this.radius] || this.radius;
             },
 
             getSpacingLabel() {
-                const map = {
-                    tight: 'Tight',
-                    compact: 'Compact',
-                    comfortable: 'Normal',
-                    spacious: 'Spacious',
-                };
-                return map[this.spacing] || this.spacing;
+                return this.translations.spacings?.[this.spacing] || this.spacing;
             },
 
             getFontSizeLabel() {
@@ -1052,12 +1041,12 @@
                     const data = await res.json();
                     if (res.ok && data.success) {
                         this.hasUserOverride = true;
-                        this.notify(data.message || '✓ Đã lưu cấu hình cá nhân của bạn!', 'success');
+                        this.notify(data.message || this.translations.notifications?.user_saved, 'success');
                     } else {
-                        this.notify(data.error || 'Lỗi khi lưu cấu hình.', 'error');
+                        this.notify(data.error || this.translations.notifications?.user_save_failed, 'error');
                     }
                 } catch (e) {
-                    this.notify('Lỗi kết nối máy chủ.', 'error');
+                    this.notify(this.translations.notifications?.connection_error, 'error');
                 } finally {
                     this.isSaving = false;
                 }
@@ -1083,19 +1072,19 @@
                         } else {
                             this.reset();
                         }
-                        this.notify(data.message || '✓ Đã khôi phục về mặc định hệ thống!', 'success');
+                        this.notify(data.message || this.translations.notifications?.user_reset, 'success');
                     } else {
-                        this.notify(data.error || 'Lỗi khi khôi phục.', 'error');
+                        this.notify(data.error || this.translations.notifications?.user_reset_failed, 'error');
                     }
                 } catch (e) {
-                    this.notify('Lỗi kết nối máy chủ.', 'error');
+                    this.notify(this.translations.notifications?.connection_error, 'error');
                 } finally {
                     this.isResetting = false;
                 }
             },
 
             async saveGlobalDefault() {
-                if (!confirm('Bạn có chắc muốn đặt giao diện hiện tại làm MẶC ĐỊNH cho toàn bộ hệ thống & người dùng mới?')) {
+                if (!confirm(this.translations.notifications?.global_confirm)) {
                     return;
                 }
                 this.isSavingGlobal = true;
@@ -1114,12 +1103,12 @@
                     });
                     const data = await res.json();
                     if (res.ok && data.success) {
-                        this.notify(data.message || '⭐ Đã lưu làm mặc định toàn hệ thống!', 'success');
+                        this.notify(data.message || this.translations.notifications?.global_saved, 'success');
                     } else {
-                        this.notify(data.error || 'Lỗi khi lưu mặc định toàn hệ thống.', 'error');
+                        this.notify(data.error || this.translations.notifications?.global_save_failed, 'error');
                     }
                 } catch (e) {
-                    this.notify('Lỗi kết nối máy chủ.', 'error');
+                    this.notify(this.translations.notifications?.connection_error, 'error');
                 } finally {
                     this.isSavingGlobal = false;
                 }
@@ -1256,13 +1245,7 @@
             },
 
             getNavLayoutLabel() {
-                const map = {
-                    'sidebar-collapsible': 'Collapsible',
-                    'sidebar-fully-collapsible': 'Full Slide',
-                    'sidebar-fixed': 'Fixed',
-                    'top': 'Top Nav',
-                };
-                return map[this.navLayout] || this.navLayout;
+                return this.translations.navLayouts?.[this.navLayout] || this.navLayout;
             },
 
             setTheme(t) {

@@ -147,6 +147,32 @@ ThemeCustomizerPlugin::make()
 
 ---
 
+## 🌐 Localization
+
+All UI strings are translatable. English (`en`) is the default and fallback; Vietnamese (`vi`) ships with the package. The panel follows your app locale (`APP_LOCALE`).
+
+Publish the language files to override strings or add a locale:
+
+```bash
+php artisan vendor:publish --tag=filament-theme-customizer-translations
+```
+
+The files land in `lang/vendor/filament-theme-customizer/{locale}/`.
+
+---
+
+## 🔧 Config
+
+```bash
+php artisan vendor:publish --tag=filament-theme-customizer-config
+```
+
+| Key | Default | Description |
+| --- | --- | --- |
+| `show_credit` | `false` (`FILAMENT_THEME_CUSTOMIZER_SHOW_CREDIT`) | Show the "Free Plugin" credit badge in the panel footer. |
+
+---
+
 ## 🎨 Publishing Views (Optional)
 
 If you want to customize the Blade templates:
