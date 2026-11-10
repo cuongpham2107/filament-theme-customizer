@@ -13,7 +13,9 @@ class ThemeCustomizerServiceProvider extends PackageServiceProvider
     {
         $package
             ->name(static::$name)
+            ->hasConfigFile()
             ->hasViews()
+            ->hasTranslations()
             ->hasMigration('2026_01_01_000000_create_filament_theme_settings_table');
     }
 

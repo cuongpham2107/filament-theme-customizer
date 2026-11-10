@@ -13,12 +13,12 @@ class ThemeSettingsController extends Controller
     public function saveUserSettings(Request $request): JsonResponse
     {
         if (! auth()->check()) {
-            return response()->json(['error' => 'Unauthenticated.'], 401);
+            return response()->json(['error' => __('filament-theme-customizer::messages.unauthenticated')], 401);
         }
 
         $plugin = ThemeCustomizerPlugin::get();
         if (! $plugin->isCustomizable()) {
-            return response()->json(['error' => 'Unauthorized to customize theme.'], 403);
+            return response()->json(['error' => __('filament-theme-customizer::messages.unauthorized_customize')], 403);
         }
 
         $validated = $request->validate([
@@ -33,19 +33,19 @@ class ThemeSettingsController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Cấu hình giao diện cá nhân đã được lưu thành công.',
+            'message' => __('filament-theme-customizer::messages.user_saved'),
         ]);
     }
 
     public function resetUserSettings(Request $request): JsonResponse
     {
         if (! auth()->check()) {
-            return response()->json(['error' => 'Unauthenticated.'], 401);
+            return response()->json(['error' => __('filament-theme-customizer::messages.unauthenticated')], 401);
         }
 
         $plugin = ThemeCustomizerPlugin::get();
         if (! $plugin->isCustomizable()) {
-            return response()->json(['error' => 'Unauthorized to customize theme.'], 403);
+            return response()->json(['error' => __('filament-theme-customizer::messages.unauthorized_customize')], 403);
         }
 
         $panel = $request->input('panel', 'default');
@@ -55,7 +55,7 @@ class ThemeSettingsController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Đã khôi phục về cấu hình mặc định của hệ thống.',
+            'message' => __('filament-theme-customizer::messages.user_reset'),
             'settings' => $resolved,
         ]);
     }
@@ -63,12 +63,12 @@ class ThemeSettingsController extends Controller
     public function saveGlobalDefault(Request $request): JsonResponse
     {
         if (! auth()->check()) {
-            return response()->json(['error' => 'Unauthenticated.'], 401);
+            return response()->json(['error' => __('filament-theme-customizer::messages.unauthenticated')], 401);
         }
 
         $plugin = ThemeCustomizerPlugin::get();
         if (! $plugin->isGlobalDefaultAllowed()) {
-            return response()->json(['error' => 'Unauthorized to set global theme default.'], 403);
+            return response()->json(['error' => __('filament-theme-customizer::messages.unauthorized_global')], 403);
         }
 
         $validated = $request->validate([
@@ -83,7 +83,7 @@ class ThemeSettingsController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Đã lưu cấu hình làm mặc định cho toàn bộ hệ thống & người dùng mới.',
+            'message' => __('filament-theme-customizer::messages.global_saved'),
         ]);
     }
 }
