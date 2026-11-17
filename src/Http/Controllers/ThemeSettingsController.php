@@ -10,15 +10,20 @@ use Illuminate\Routing\Controller;
 
 class ThemeSettingsController extends Controller
 {
+    protected function resolvePlugin(string $panelId): ThemeCustomizerPlugin
+    {
+        $panel = filament()->getPanel($panelId, isStrict: false) ?? filament()->getDefaultPanel();
+
+        /** @var ThemeCustomizerPlugin $plugin */
+        $plugin = $panel->getPlugin('filament-theme-customizer');
+
+        return $plugin;
+    }
+
     public function saveUserSettings(Request $request): JsonResponse
     {
         if (! auth()->check()) {
             return response()->json(['error' => __('filament-theme-customizer::messages.unauthenticated')], 401);
-        }
-
-        $plugin = ThemeCustomizerPlugin::get();
-        if (! $plugin->isCustomizable()) {
-            return response()->json(['error' => __('filament-theme-customizer::messages.unauthorized_customize')], 403);
         }
 
         $validated = $request->validate([
@@ -27,6 +32,12 @@ class ThemeSettingsController extends Controller
         ]);
 
         $panel = $validated['panel'] ?? 'default';
+        $plugin = $this->resolvePlugin($panel);
+
+        if (! $plugin->isCustomizable()) {
+            return response()->json(['error' => __('filament-theme-customizer::messages.unauthorized_customize')], 403);
+        }
+
         $settings = $validated['settings'];
 
         ThemeSettingsService::saveUserSettings($settings, $panel, auth()->id());
@@ -43,12 +54,12 @@ class ThemeSettingsController extends Controller
             return response()->json(['error' => __('filament-theme-customizer::messages.unauthenticated')], 401);
         }
 
-        $plugin = ThemeCustomizerPlugin::get();
+        $panel = $request->input('panel', 'default');
+        $plugin = $this->resolvePlugin($panel);
+
         if (! $plugin->isCustomizable()) {
             return response()->json(['error' => __('filament-theme-customizer::messages.unauthorized_customize')], 403);
         }
-
-        $panel = $request->input('panel', 'default');
 
         ThemeSettingsService::resetUserSettings($panel, auth()->id());
         $resolved = ThemeSettingsService::getResolvedSettings($panel, auth()->id());
@@ -66,17 +77,18 @@ class ThemeSettingsController extends Controller
             return response()->json(['error' => __('filament-theme-customizer::messages.unauthenticated')], 401);
         }
 
-        $plugin = ThemeCustomizerPlugin::get();
-        if (! $plugin->isGlobalDefaultAllowed()) {
-            return response()->json(['error' => __('filament-theme-customizer::messages.unauthorized_global')], 403);
-        }
-
         $validated = $request->validate([
             'panel' => ['nullable', 'string', 'max:64'],
             'settings' => ['required', 'array'],
         ]);
 
         $panel = $validated['panel'] ?? 'default';
+        $plugin = $this->resolvePlugin($panel);
+
+        if (! $plugin->isGlobalDefaultAllowed()) {
+            return response()->json(['error' => __('filament-theme-customizer::messages.unauthorized_global')], 403);
+        }
+
         $settings = $validated['settings'];
 
         ThemeSettingsService::saveGlobalSettings($settings, $panel);

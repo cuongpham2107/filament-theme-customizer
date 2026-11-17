@@ -133,6 +133,8 @@ class ThemeCustomizerPlugin implements Plugin
         $panel->renderHook(
             PanelsRenderHook::HEAD_START,
             fn (): string => view('filament-theme-customizer::anti-fouc', [
+                'panelId' => $panelId,
+                'userId' => auth()->id(),
                 'resolvedSettings' => ThemeSettingsService::getResolvedSettings($panelId),
             ])->render(),
         );
@@ -161,6 +163,7 @@ class ThemeCustomizerPlugin implements Plugin
                     'position' => $this->position,
                     'showFloatingLauncher' => $this->showFloatingLauncher,
                     'panelId' => $panelId,
+                    'userId' => auth()->id(),
                     'resolvedSettings' => ThemeSettingsService::getResolvedSettings($panelId),
                     'hasCustomUserSettings' => ThemeSettingsService::hasCustomUserSettings($panelId),
                     'canSetGlobalDefault' => $this->isGlobalDefaultAllowed(),

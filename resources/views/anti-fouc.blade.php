@@ -1,4 +1,7 @@
 @php
+    $panelId = $panelId ?? 'default';
+    $userId = $userId ?? auth()->id();
+    $storageKey = 'fi_theme_customizer_' . $panelId . '_' . ($userId ?? 'guest');
     $resolvedSettings = $resolvedSettings ?? [];
 @endphp
 
@@ -9,7 +12,12 @@
     (function () {
         try {
             const server = @json($resolvedSettings);
-            let raw = localStorage.getItem('fi_theme_customizer') || localStorage.getItem('fi_official_theme_studio');
+            const storageKey = @json($storageKey);
+            const isAuthenticated = @json($userId !== null);
+            let raw = localStorage.getItem(storageKey);
+            if (!raw && !isAuthenticated) {
+                raw = localStorage.getItem('fi_theme_customizer') || localStorage.getItem('fi_official_theme_studio');
+            }
             let local = null;
             try {
                 local = raw ? JSON.parse(raw) : null;
@@ -17,8 +25,13 @@
                 local = null;
             }
 
-            // Merge server settings (User or System Global) with any live local session
-            const s = Object.assign({}, server || {}, local || {});
+            // Authenticated users always use DB-resolved settings (user > global > default) as source of truth
+            const s = isAuthenticated
+                ? Object.assign({}, local || {}, server || {})
+                : Object.assign({}, server || {}, local || {});
+            if (isAuthenticated && local && server && local.palette && server.palette && local.palette !== server.palette) {
+                delete s.paletteColors;
+            }
             if (!s || Object.keys(s).length === 0) return;
 
             const root = document.documentElement;

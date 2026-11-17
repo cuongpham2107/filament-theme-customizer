@@ -2,6 +2,8 @@
     $palettesFile = resource_path('js/filament-palettes.json');
     $palettes = file_exists($palettesFile) ? json_decode(file_get_contents($palettesFile), true) : [];
     $panelId = $panelId ?? 'default';
+    $userId = $userId ?? auth()->id();
+    $storageKey = 'fi_theme_customizer_' . $panelId . '_' . ($userId ?? 'guest');
     $showFloatingLauncher = $showFloatingLauncher ?? true;
     $resolvedSettings = $resolvedSettings ?? [];
     $hasCustomUserSettings = $hasCustomUserSettings ?? false;
@@ -25,6 +27,8 @@
     x-data="filamentThemeStudio({
         palettes: {{ Js::from($palettes) }},
         panelId: {{ Js::from($panelId) }},
+        userId: {{ Js::from($userId) }},
+        storageKey: {{ Js::from($storageKey) }},
         serverSettings: {{ Js::from($resolvedSettings) }},
         hasCustomUserSettings: {{ Js::from($hasCustomUserSettings) }},
         canSetGlobalDefault: {{ Js::from($canSetGlobalDefault) }},
@@ -862,6 +866,8 @@
         Alpine.data('filamentThemeStudio', ({
             palettes = {},
             panelId = 'default',
+            userId = null,
+            storageKey = 'fi_theme_customizer',
             serverSettings = {},
             hasCustomUserSettings = false,
             canSetGlobalDefault = false,
@@ -871,6 +877,8 @@
         } = {}) => ({
             open: false,
             panelId: panelId,
+            userId: userId,
+            storageKey: storageKey,
             serverSettings: serverSettings,
             hasUserOverride: Boolean(hasCustomUserSettings),
             canSetGlobalDefault: Boolean(canSetGlobalDefault),
@@ -880,6 +888,7 @@
             isSaving: false,
             isResetting: false,
             isSavingGlobal: false,
+            _autoSaveTimer: null,
             notification: { show: false, message: '', type: 'success' },
 
             theme: 'modern',
@@ -1028,8 +1037,14 @@
                 this.saveSettings();
             },
 
-            async saveUserSettings() {
-                this.isSaving = true;
+            async saveUserSettings({ silent = false } = {}) {
+                if (this._autoSaveTimer) {
+                    clearTimeout(this._autoSaveTimer);
+                    this._autoSaveTimer = null;
+                }
+                if (!silent) {
+                    this.isSaving = true;
+                }
                 try {
                     const res = await fetch(this.routes.saveUser, {
                         method: 'POST',
@@ -1046,18 +1061,28 @@
                     const data = await res.json();
                     if (res.ok && data.success) {
                         this.hasUserOverride = true;
-                        this.notify(data.message || this.translations.notifications?.user_saved, 'success');
-                    } else {
+                        if (!silent) {
+                            this.notify(data.message || this.translations.notifications?.user_saved, 'success');
+                        }
+                    } else if (!silent) {
                         this.notify(data.error || this.translations.notifications?.user_save_failed, 'error');
                     }
                 } catch (e) {
-                    this.notify(this.translations.notifications?.connection_error, 'error');
+                    if (!silent) {
+                        this.notify(this.translations.notifications?.connection_error, 'error');
+                    }
                 } finally {
-                    this.isSaving = false;
+                    if (!silent) {
+                        this.isSaving = false;
+                    }
                 }
             },
 
             async resetUserSettings() {
+                if (this._autoSaveTimer) {
+                    clearTimeout(this._autoSaveTimer);
+                    this._autoSaveTimer = null;
+                }
                 this.isResetting = true;
                 try {
                     const res = await fetch(this.routes.resetUser, {
@@ -1129,12 +1154,17 @@
 
             loadSettings() {
                 try {
-                    const raw = localStorage.getItem('fi_theme_customizer') || localStorage.getItem('fi_official_theme_studio');
+                    let raw = localStorage.getItem(this.storageKey);
+                    if (!raw && !this.userId) {
+                        raw = localStorage.getItem('fi_theme_customizer') || localStorage.getItem('fi_official_theme_studio');
+                    }
                     let parsed = null;
                     if (raw) {
                         try { parsed = JSON.parse(raw); } catch (e) {}
                     }
-                    const s = Object.assign({}, this.serverSettings || {}, parsed || {});
+                    const s = this.userId
+                        ? Object.assign({}, parsed || {}, this.serverSettings || {})
+                        : Object.assign({}, this.serverSettings || {}, parsed || {});
                     if (s) {
                         if (s.theme) {
                             let t = s.theme;
@@ -1170,10 +1200,13 @@
                 }
 
                 this.applyTheme();
+                if (this.userId) {
+                    this.writeLocalStorage();
+                }
             },
 
-            saveSettings() {
-                localStorage.setItem('fi_theme_customizer', JSON.stringify({
+            writeLocalStorage() {
+                localStorage.setItem(this.storageKey, JSON.stringify({
                     theme: this.theme,
                     surface: this.surface,
                     contentWidth: this.contentWidth,
@@ -1188,6 +1221,19 @@
                     spacing: this.spacing,
                     paletteColors: this.palettes[this.palette] || null,
                 }));
+            },
+
+            saveSettings() {
+                this.writeLocalStorage();
+
+                if (this.userId) {
+                    if (this._autoSaveTimer) {
+                        clearTimeout(this._autoSaveTimer);
+                    }
+                    this._autoSaveTimer = setTimeout(() => {
+                        this.saveUserSettings({ silent: true });
+                    }, 400);
+                }
             },
 
             applyTheme() {
